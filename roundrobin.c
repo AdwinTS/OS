@@ -10,12 +10,20 @@ struct Process {
     int wt;
 };
 
+struct Gantt {
+    int pid;
+    int start;
+    int end;
+};
+
 void main() {
     int n, tq;
     printf("Enter the number of processes: ");
     scanf("%d", &n);
 
     struct Process p[n];
+    struct Gantt gc[100];
+int gc_index = 0;
     int completed = 0;
     int time = 0;
     int queue[100]; // to simulate ready queue
@@ -68,9 +76,14 @@ while(completed < n) {
     start_time = time;
     time += exec_time;
     p[idx].rt -= exec_time;
+    gc[gc_index].pid = p[idx].pid;
+    gc[gc_index].start = start_time;
+    gc[gc_index].end = time;
+    gc_index++;
+
 
     // Print process box
-    printf("| P[%d] ", p[idx].pid+1);
+    //printf("| P[%d] ", p[idx].pid+1);
 
     // Enqueue newly arrived processes
     for(int i = 0; i < n; i++) {
@@ -93,14 +106,16 @@ while(completed < n) {
 printf("|\n");
 
 // Time markers
-printf("0");
-int t = 0;
-for (int i = 0; i < front; i++) {
-    int id = queue[i];
-    int slice = (p[id].bt < tq) ? p[id].bt : tq;
-    t += slice;
-    printf("      %d", t); // adjust spacing as needed
+printf("\nGantt Chart:\n ");
+for (int i = 0; i < gc_index; i++) {
+    printf("| P[%d]\t", gc[i].pid + 1);
 }
+printf("|\n");
+
+for (int i = 0; i < gc_index; i++) {
+    printf("%d\t\t", gc[i].start);
+}
+printf("%d\n", gc[gc_index - 1].end);
 printf("\n");
     // Print Table
     printf("\n\n\tPID\tAT\tBT\tCT\tTAT\tWT\n");
