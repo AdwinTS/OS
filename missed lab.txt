@@ -289,5 +289,34 @@ mysql> select count(*) from sportdetails group by points having points>27;
 |        1 |
 +----------+
 2 rows in set (0.04 sec)
+       alter table student_details rename column student_id to id;
+Query OK, 0 rows affected (0.11 sec)
+Records: 0  Duplicates: 0  Warnings: 0
 
-mysql>
+mysql> select max(points) from sportdetails;
++-------------+
+| max(points) |
++-------------+
+|          92 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select count(points) from sportdetails;
++---------------+
+| count(points) |
++---------------+
+|             4 |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> select * from sportdetails
+    -> ;
++------------+---------------+--------+
+| student_no | student_sport | points |
++------------+---------------+--------+
+|          1 | cricket       |     25 |
+|          2 | football      |     36 |
+|          3 | handball      |     92 |
+|          4 | tennis        |     25 |
++------------+---------------+--------+
+4 rows in set (0.00 sec)
