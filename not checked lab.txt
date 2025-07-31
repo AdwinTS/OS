@@ -1,0 +1,160 @@
+create table trial_1_student_details (student_id int,student_name varchar(70),student_class varchar(70),student_remark varchar(70));
+Query OK, 0 rows affected (0.18 sec)
+
+MariaDB [adwin]> create table trial_2_teacher_details (teacher_id int,teacher_name varchar(70),teacher_remark varchar(70));
+Query OK, 0 rows affected (0.19 sec)
+
+MariaDB [adwin]> alter table trial_1_student add PRIMARY KEY(student_id);
+ERROR 1146 (42S02): Table 'adwin.trial_1_student' doesn't exist
+MariaDB [adwin]> alter table trial_1_student_details add PRIMARY KEY(student_id);
+Query OK, 0 rows affected (0.35 sec)               
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_2_teacher_details add PRIMARY KEY(teacher_id);
+Query OK, 0 rows affected (0.43 sec)               
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_1_student_details add column classteacher_name varchar(70); 
+Query OK, 0 rows affected (0.28 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_1_student change classteacher_name classteacher_id int;
+ERROR 1146 (42S02): Table 'adwin.trial_1_student' doesn't exist
+MariaDB [adwin]> alter table trial_1_student_details change classteacher_name classteacher_id int;
+Query OK, 0 rows affected (0.35 sec)               
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_2_teacher_details add FOREIGN KEY(teacher_id) references trial_1_student_details(classteacher_id);
+ERROR 1005 (HY000): Can't create table `adwin`.`#sql-7be_20` (errno: 150 "Foreign key constraint is incorrectly formed")
+MariaDB [adwin]> alter table trial_2_teacher_details add constraint fk_dept  FOREIGN KEY(teacher_id) references trial_1_student_details(classteacher_id);
+ERROR 1005 (HY000): Can't create table `adwin`.`#sql-7be_20` (errno: 150 "Foreign key constraint is incorrectly formed")
+MariaDB [adwin]> alter table trial_2_teacher_details add PRIMARY KEY(teacher_id);
+ERROR 1068 (42000): Multiple primary key defined
+MariaDB [adwin]> alter table trial_2_teacher_details add UNIQUE(classteacher_id);
+ERROR 1072 (42000): Key column 'classteacher_id' doesn't exist in table
+MariaDB [adwin]> alter table trial_1_student_details add UNIQUE(classteacher_id);
+Query OK, 0 rows affected (0.15 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_2_teacher_details add constraint fk_dept  FOREIGN KEY(teacher_id) references trial_1_student_details(classteacher_id);
+Query OK, 0 rows affected (0.40 sec)               
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_2_teacher_details add column student_review varchar(70) ,add column student_star decimal(10,2);
+Query OK, 0 rows affected (0.27 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> alter table trial_2_teacher_details modify  column student_review varchar(80) ,modify column student_star int;
+Query OK, 0 rows affected (0.46 sec)               
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> select student_star from trial_2_teacher_details;
+Empty set (0.01 sec)
+
+MariaDB [adwin]> alter table trial_2_teacher_details rename column student_star to student_rating;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'column student_star to student_rating' at line 1
+MariaDB [adwin]> alter table trial_2_teacher_details rename column student_star to student_rating int ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'column student_star to student_rating int' at line 1
+MariaDB [adwin]> alter table trial_2_teacher_details change column student_star to student_rating  ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'to student_rating' at line 1
+MariaDB [adwin]> alter table trial_2_teacher_details change column student_star to student_rating  int;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'to student_rating  int' at line 1
+MariaDB [adwin]> alter table trial_2_teacher_details change column student_star  student_rating ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+MariaDB [adwin]> alter table trial_2_teacher_details change column student_star  student_rating int;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [adwin]> rename table trial_2_teacher_details to teacher_details;
+Query OK, 0 rows affected (0.08 sec)
+
+MariaDB [adwin]> create table demo(demo_id int,d_name varchar(80));
+Query OK, 0 rows affected (0.18 sec)
+
+MariaDB [adwin]> drop table demo;
+Query OK, 0 rows affected (0.06 sec)
+
+MariaDB [adwin]> desc trial_1_student_details;
++-----------------+-------------+------+-----+---------+-------+
+| Field           | Type        | Null | Key | Default | Extra |
++-----------------+-------------+------+-----+---------+-------+
+| student_id      | int(11)     | NO   | PRI | 0       |       |
+| student_name    | varchar(70) | YES  |     | NULL    |       |
+| student_class   | varchar(70) | YES  |     | NULL    |       |
+| student_remark  | varchar(70) | YES  |     | NULL    |       |
+| classteacher_id | int(11)     | YES  | UNI | NULL    |       |
++-----------------+-------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [adwin]> insert into trial_1_student_details(12,"akul","CSA","good class",123);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '12,"akul","CSA","good class",123)' at line 1
+MariaDB [adwin]> insert into trial_1_student_details values(12,"akul","CSA","good class",123);
+Query OK, 1 row affected (0.02 sec)
+
+MariaDB [adwin]> select * from Ctrl-C -- exit!
+Aborted
+mec@dell-Vostro-3470:~$ mysql -umec -p
+Enter password: 
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 44
+Server version: 10.0.24-MariaDB-7 Ubuntu 16.04
+
+Copyright (c) 2000, 2016, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> use adwin;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MariaDB [adwin]> select * from trial_1_student_details;
++------------+--------------+---------------+----------------+-----------------+
+| student_id | student_name | student_class | student_remark | classteacher_id |
++------------+--------------+---------------+----------------+-----------------+
+|         12 | akul         | CSA           | good class     |             123 |
++------------+--------------+---------------+----------------+-----------------+
+1 row in set (0.00 sec)
+
+MariaDB [adwin]> truncate table trial_1_student_details;
+ERROR 1701 (42000): Cannot truncate a table referenced in a foreign key constraint (`adwin`.`teacher_details`, CONSTRAINT `fk_dept` FOREIGN KEY (`teacher_id`) REFERENCES `adwin`.`trial_1_student_details` (`classteacher_id`))
+MariaDB [adwin]> desc teacher_details;
++----------------+-------------+------+-----+---------+-------+
+| Field          | Type        | Null | Key | Default | Extra |
++----------------+-------------+------+-----+---------+-------+
+| teacher_id     | int(11)     | NO   | PRI | 0       |       |
+| teacher_name   | varchar(70) | YES  |     | NULL    |       |
+| teacher_remark | varchar(70) | YES  |     | NULL    |       |
+| student_review | varchar(80) | YES  |     | NULL    |       |
+| student_rating | int(11)     | YES  |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [adwin]> insert into teacher_details(12,"sandra","good class","good","good review");
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '12,"sandra","good class","good","good review")' at line 1
+MariaDB [adwin]> insert into teacher_details values(12,"sandra","good class","good","good review");
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`adwin`.`teacher_details`, CONSTRAINT `fk_dept` FOREIGN KEY (`teacher_id`) REFERENCES `trial_1_student_details` (`classteacher_id`))
+MariaDB [adwin]> insert into teacher_details values(123,"sandra","good class","good","good review");
+Query OK, 1 row affected, 1 warning (0.02 sec)
+
+MariaDB [adwin]> truncate table teacher_details;
+Query OK, 0 rows affected (0.17 sec)
+
+MariaDB [adwin]> insert into teacher_details values(123,"andra","good class","good","good review");
+Query OK, 1 row affected, 1 warning (0.02 sec)
+
+MariaDB [adwin]> select * from teacher_details;
++------------+--------------+----------------+----------------+----------------+
+| teacher_id | teacher_name | teacher_remark | student_review | student_rating |
++------------+--------------+----------------+----------------+----------------+
+|        123 | andra        | good class     | good           |              0 |
++------------+--------------+----------------+----------------+----------------+
+1 row in set (0.00 sec)
+
+MariaDB [adwin]> truncate teacher_details;
+Query OK, 0 rows affected (0.20 sec)
+
+MariaDB [adwin]> select * from teacher_details;
+Empty set (0.00 sec)
+
+MariaDB [adwin]>

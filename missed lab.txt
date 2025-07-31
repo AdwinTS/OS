@@ -1,0 +1,293 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\admin> mysql -u root -p
+Enter password: ********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 8.0.41 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use adwin;
+Database changed
+mysql> show tables;
++-------------------+
+| Tables_in_adwin   |
++-------------------+
+| efootball_updates |
+| product           |
+| sales             |
+| sportdetails      |
+| student_details   |
++-------------------+
+5 rows in set (0.01 sec)
+
+mysql> select * from sales;
++---------+------------+-------------+------------------+
+| sale_id | product_id | total_price | remarks          |
++---------+------------+-------------+------------------+
+|     123 |        101 |     1234.00 | its good product |
++---------+------------+-------------+------------------+
+1 row in set (0.07 sec)
+
+mysql> select * from sportdetails;
++------------+---------------+--------+
+| student_no | student_sport | points |
++------------+---------------+--------+
+|          1 | cricket       |     25 |
+|          2 | football      |     36 |
+|          3 | handball      |     92 |
++------------+---------------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select count(*) from sportdetails;
++----------+
+| count(*) |
++----------+
+|        3 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> select min(points) from sportdetails;
++-------------+
+| min(points) |
++-------------+
+|          25 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select avg(points) from sportdetails;
++-------------+
+| avg(points) |
++-------------+
+|     51.0000 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select sum(points) from sportdetails;
++-------------+
+| sum(points) |
++-------------+
+|         153 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select ascii('A');
++------------+
+| ascii('A') |
++------------+
+|         65 |
++------------+
+1 row in set (0.04 sec)
+
+mysql> select concat('Hi',' ','there');
++--------------------------+
+| concat('Hi',' ','there') |
++--------------------------+
+| Hi there                 |
++--------------------------+
+1 row in set (0.04 sec)
+
+mysql> select lower('HI');
++-------------+
+| lower('HI') |
++-------------+
+| hi          |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select upper('hi');
++-------------+
+| upper('hi') |
++-------------+
+| HI          |
++-------------+
+1 row in set (0.05 sec)
+
+mysql> select trim('     hello ');
++---------------------+
+| trim('     hello ') |
++---------------------+
+| hello               |
++---------------------+
+1 row in set (0.04 sec)
+
+mysql> select replace('heh yaw','heh','hew');
++--------------------------------+
+| replace('heh yaw','heh','hew') |
++--------------------------------+
+| hew yaw                        |
++--------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select length('hey');
++---------------+
+| length('hey') |
++---------------+
+|             3 |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> select cos(0);
++--------+
+| cos(0) |
++--------+
+|      1 |
++--------+
+1 row in set (0.00 sec)
+
+mysql> select log10(100);
++------------+
+| log10(100) |
++------------+
+|          2 |
++------------+
+1 row in set (0.00 sec)
+
+mysql> select mod(10,4);
++-----------+
+| mod(10,4) |
++-----------+
+|         2 |
++-----------+
+1 row in set (0.04 sec)
+
+mysql> select power(2,3);
++------------+
+| power(2,3) |
++------------+
+|          8 |
++------------+
+1 row in set (0.00 sec)
+
+mysql> select sign(-5);
++----------+
+| sign(-5) |
++----------+
+|       -1 |
++----------+
+1 row in set (0.03 sec)
+
+mysql> select sqrt(16);
++----------+
+| sqrt(16) |
++----------+
+|        4 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> select sin(pi()/2);
++-------------+
+| sin(pi()/2) |
++-------------+
+|           1 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select round(4.567,2);
++----------------+
+| round(4.567,2) |
++----------------+
+|           4.57 |
++----------------+
+1 row in set (0.00 sec)
+
+mysql> select * from sportdetails;
++------------+---------------+--------+
+| student_no | student_sport | points |
++------------+---------------+--------+
+|          1 | cricket       |     25 |
+|          2 | football      |     36 |
+|          3 | handball      |     92 |
++------------+---------------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select student_sport from sportdetails order by points asc;
++---------------+
+| student_sport |
++---------------+
+| cricket       |
+| football      |
+| handball      |
++---------------+
+3 rows in set (0.00 sec)
+
+mysql> select student_sport from sportdetails order by points ;
++---------------+
+| student_sport |
++---------------+
+| cricket       |
+| football      |
+| handball      |
++---------------+
+3 rows in set (0.00 sec)
+
+mysql> select student_sport from sportdetails order by points desc;
++---------------+
+| student_sport |
++---------------+
+| handball      |
+| football      |
+| cricket       |
++---------------+
+3 rows in set (0.00 sec)
+
+mysql> select student_no,student_sport from sportdetails order by points desc;
++------------+---------------+
+| student_no | student_sport |
++------------+---------------+
+|          3 | handball      |
+|          2 | football      |
+|          1 | cricket       |
++------------+---------------+
+3 rows in set (0.00 sec)
+
+mysql> insert into sportdetails values (4,'tennis',25);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`adwin`.`sportdetails`, CONSTRAINT `sportdetails_ibfk_1` FOREIGN KEY (`student_no`) REFERENCES `student_details` (`student_id`))
+mysql> selet * from student_details;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'selet * from student_details' at line 1
+mysql> select * from student_details;
++------------+-------------+--------------+------------------+
+| student_id | student_age | student_name | class_teacher_id |
++------------+-------------+--------------+------------------+
+|          1 |          20 | adwin        |              231 |
+|          2 |          23 | aloid        |              331 |
+|          3 |          25 | Amala        |              345 |
++------------+-------------+--------------+------------------+
+3 rows in set (0.00 sec)
+
+mysql> insert into student_details values(4,27,'Aaron',347);
+Query OK, 1 row affected (0.06 sec)
+
+mysql> insert into sportdetails values (4,'tennis',25);
+Query OK, 1 row affected (0.07 sec)
+
+mysql> select count(*) from sportdetails group by points;
++----------+
+| count(*) |
++----------+
+|        2 |
+|        1 |
+|        1 |
++----------+
+3 rows in set (0.06 sec)
+
+mysql> select count(*) from sportdetails group by points having points>27;
++----------+
+| count(*) |
++----------+
+|        1 |
+|        1 |
++----------+
+2 rows in set (0.04 sec)
+
+mysql>
