@@ -31,7 +31,7 @@ int main() {
     }
 
     // Print header
-    printf("H^%s^%s^%d\n", label, start, length);
+    printf("H^%s^%s^0000%d\n", label, start, length);
     printf("T^00%s^", start);
 
     // Process each instruction until END
