@@ -1,86 +1,117 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <stdlib.h>
 
 int main() {
-    FILE *fint, *ftab, *flen, *fsym;
-    int i, length;
-    char add[10], symadd[10], op[10], start[10];
-    char label[20], mne[20], operand[20], symtab[20], opmne[20];
+    int start, length, temp;
+    char addr[10], label[10], opcode[10], operand[10];
+    char mnemonic[10], code[10];
+    char symbol[10], symaddr[10];
 
-    // Open files
-    fint = fopen("input2.txt", "r");
-    flen = fopen("length2.txt", "r");
-    ftab = fopen("optab2.txt", "r");
-    fsym = fopen("symbol2.txt", "r");
+    FILE *inter, *optab, *symtab, *asml, *objc, *leng;
 
-    if (!fint || !flen || !ftab || !fsym) {
-        printf("Error opening files.\n");
+    inter = fopen("input2.txt", "r");
+    optab = fopen("optab2.txt", "r");
+    symtab = fopen("symbol2.txt", "r");
+    asml = fopen("asml.txt", "w");
+    objc = fopen("obj.txt", "w");
+    leng = fopen("length2.txt", "r");
+
+    if (!inter || !optab || !symtab || !asml || !objc || !leng) {
+        printf("Error: Could not open one or more files.\n");
         return 1;
     }
 
-    // Read first line from input
-    fscanf(fint, "%s%s%s%s", add, label, mne, operand);
+    fscanf(leng, "%d", &length);
 
-    // If START, store starting address and program length
-    if (strcmp(mne, "START") == 0) {
-        strcpy(start, operand);
-        fscanf(flen, "%d", &length);
-        fscanf(fint, "%s%s%s%s", add, label, mne, operand);
+    // Read first line
+    fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
+
+    if (strcmp(opcode, "START") == 0) {
+        start = atoi(operand);
+        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n", addr, label, opcode, operand);
+        fprintf(objc, "H^%-6s^%06d^%06X\n", label, start, length);
+        fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
+    } else {
+        start = 0;
     }
 
-    // Print header
-    printf("H^%s^%s^0000%d\n", label, start, length);
-    printf("T^00%s^", start);
+    // Start text record
+    fprintf(objc, "T^%06d^", start);
 
-    // Process each instruction until END
-    while (strcmp(mne, "END") != 0) {
+    while (strcmp(opcode, "END") != 0) {
         int found = 0;
+        rewind(optab);
 
-        // Search in OPTAB
-        rewind(ftab);
-        while (fscanf(ftab, "%s%s", opmne, op) == 2) {
-            if (strcmp(mne, opmne) == 0) {
-                // Found in OPTAB
-                rewind(fsym);
-                while (fscanf(fsym, "%s%s", symadd, symtab) == 2) {
-                    if (strcmp(operand, symtab) == 0) {
-                        printf("%s%s^", op, symadd);
+        // Search opcode in OPTAB
+        while (fscanf(optab, "%s %s", mnemonic, code) != EOF) {
+            if (strcmp(mnemonic, opcode) == 0) {
+                found = 1;
+                rewind(symtab);
+                int sym_found = 0;
+
+                while (fscanf(symtab, "%s %s", symbol, symaddr) != EOF) {
+                    if (strcmp(symbol, operand) == 0) {
+                        fprintf(objc, "%s%s^", code, symaddr);
+                        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s%s\n",
+                                addr, label, opcode, operand, code, symaddr);
+                        sym_found = 1;
                         break;
                     }
                 }
-                found = 1;
+                if (!sym_found) {
+                    fprintf(objc, "%s0000^", code);
+                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s0000\n",
+                            addr, label, opcode, operand, code);
+                }
                 break;
             }
         }
 
-        // If not found in OPTAB, check BYTE/WORD
+        // If not found in OPTAB (assembler directives)
         if (!found) {
-            if (strcmp(mne, "WORD") == 0) {
-                printf("0000%s^", operand);
-            } else if (strcmp(mne, "BYTE") == 0) {
-                if (operand[0] == 'C' && operand[1] == '\'') {
-                    for (i = 2; i < strlen(operand) - 1; i++) {
-                        printf("%X", operand[i]); // hex
+            if (strcmp(opcode, "WORD") == 0) {
+                temp = atoi(operand);
+                fprintf(objc, "%06d^", temp);
+                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%06d\n",
+                        addr, label, opcode, operand, temp);
+            } else if (strcmp(opcode, "BYTE") == 0) {
+                if (operand[0] == 'C') {
+                    for (int i = 2; i < (int)strlen(operand) - 1; i++) {
+                        fprintf(objc, "%02d", operand[i]);
                     }
-                    printf("^");
+                    fprintf(objc, "^");
+                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
+                            addr, label, opcode, operand, operand);
+                } else if (operand[0] == 'X') {
+                    for (int i = 2; i < (int)strlen(operand) - 1; i++) {
+                        fprintf(objc, "%c", operand[i]);
+                    }
+                    fprintf(objc, "^");
+                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
+                            addr, label, opcode, operand, operand);
                 }
+            } else {
+                // RESW / RESB or unknown → no object code
+                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n",
+                        addr, label, opcode, operand);
             }
         }
 
-        // Read next line
-        fscanf(fint, "%s%s%s%s", add, label, mne, operand);
+        fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
     }
 
-    // End record
-    printf("\nE^00%s\n", start);
+    // END line
+    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n", addr, label, opcode, operand);
+    fprintf(objc, "\nE^%06d\n", start);
 
-    // Close files to finish lets goo😊
-    fclose(fint);
-    fclose(ftab);
-    fclose(fsym);
-    fclose(flen);
+    fclose(optab);
+    fclose(symtab);
+    fclose(asml);
+    fclose(objc);
+    fclose(inter);
+    fclose(leng);
 
+    printf("Pass 2 completed successfully.\n");
     return 0;
 }
