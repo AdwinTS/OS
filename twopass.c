@@ -28,16 +28,18 @@ int main() {
     fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
 
     if (strcmp(opcode, "START") == 0) {
-        start = atoi(operand);
+        start = (int)strtol(operand, NULL, 16);   // read as HEX
         fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n", addr, label, opcode, operand);
-        fprintf(objc, "H^%-6s^%06d^%06X\n", label, start, length);
+        fprintf(objc, "H^%-6s^%06X^%06X\n", label, start, length);
         fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
     } else {
         start = 0;
     }
 
-    // Start text record
-    fprintf(objc, "T^%06d^", start);
+    // Prepare text record buffer
+    char textRec[500] = "";
+    int textLen = 0;   // length in bytes
+    int textStart = start;
 
     while (strcmp(opcode, "END") != 0) {
         int found = 0;
@@ -52,17 +54,23 @@ int main() {
 
                 while (fscanf(symtab, "%s %s", symbol, symaddr) != EOF) {
                     if (strcmp(symbol, operand) == 0) {
-                        fprintf(objc, "%s%s^", code, symaddr);
-                        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s%s\n",
-                                addr, label, opcode, operand, code, symaddr);
+                        char objCode[20];
+                        sprintf(objCode, "%s%s", code, symaddr);
+                        sprintf(textRec + strlen(textRec), "^%s", objCode);
+                        textLen += 3;  // instruction size
+                        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
+                                addr, label, opcode, operand, objCode);
                         sym_found = 1;
                         break;
                     }
                 }
                 if (!sym_found) {
-                    fprintf(objc, "%s0000^", code);
-                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s0000\n",
-                            addr, label, opcode, operand, code);
+                    char objCode[20];
+                    sprintf(objCode, "%s0000", code);
+                    sprintf(textRec + strlen(textRec), "^%s", objCode);
+                    textLen += 3;
+                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
+                            addr, label, opcode, operand, objCode);
                 }
                 break;
             }
@@ -72,27 +80,38 @@ int main() {
         if (!found) {
             if (strcmp(opcode, "WORD") == 0) {
                 temp = atoi(operand);
-                fprintf(objc, "%06d^", temp);
-                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%06d\n",
+                char objCode[20];
+                sprintf(objCode, "%06X", temp);
+                sprintf(textRec + strlen(textRec), "^%s", objCode);
+                textLen += 3;
+                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%06X\n",
                         addr, label, opcode, operand, temp);
             } else if (strcmp(opcode, "BYTE") == 0) {
                 if (operand[0] == 'C') {
+                    char objCode[100] = "";
                     for (int i = 2; i < (int)strlen(operand) - 1; i++) {
-                        fprintf(objc, "%02d", operand[i]);
+                        char hex[5];
+                        sprintf(hex, "%02X", operand[i]);
+                        strcat(objCode, hex);
                     }
-                    fprintf(objc, "^");
+                    sprintf(textRec + strlen(textRec), "^%s", objCode);
+                    textLen += (strlen(operand) - 3);
                     fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
-                            addr, label, opcode, operand, operand);
+                            addr, label, opcode, operand, objCode);
                 } else if (operand[0] == 'X') {
+                    char objCode[100] = "";
                     for (int i = 2; i < (int)strlen(operand) - 1; i++) {
-                        fprintf(objc, "%c", operand[i]);
+                        char hex[5];
+                        sprintf(hex, "%c", operand[i]);
+                        strcat(objCode, hex);
                     }
-                    fprintf(objc, "^");
+                    sprintf(textRec + strlen(textRec), "^%s", objCode);
+                    textLen += (strlen(operand) - 3) / 2;
                     fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n",
-                            addr, label, opcode, operand, operand);
+                            addr, label, opcode, operand, objCode);
                 }
             } else {
-                // RESW / RESB or unknown → no object code
+                // RESW / RESB → no object code
                 fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n",
                         addr, label, opcode, operand);
             }
@@ -101,9 +120,12 @@ int main() {
         fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
     }
 
+    // Write final text record with length
+    fprintf(objc, "T^%06X^%02X%s\n", textStart, textLen, textRec);
+
     // END line
     fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n", addr, label, opcode, operand);
-    fprintf(objc, "\nE^%06d\n", start);
+    fprintf(objc, "E^%06X\n", start);
 
     fclose(optab);
     fclose(symtab);
